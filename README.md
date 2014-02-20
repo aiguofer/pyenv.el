@@ -3,6 +3,8 @@ pyenv.el
 
 use pyenv to manage your Python versions within Emacs
 
+pyenv.el was forked from [rbenv.el](https://github.com/senny/rbenv.el)
+
 Installation
 ------------
 
@@ -53,11 +55,3 @@ brackets. You can change the format by customizing the variable:
 
 You can also define your own function to format the python version as you like.
 
-Press
------
-
-If you want to read more about pyenv.el check out the following links:
-
-* [Use the right Python with emacs and pyenv](http://blog.senny.ch/blog/2013/02/11/use-the-right-python-with-emacs-and-pyenv/) by Yves Senn
-
-[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/f4c783738c250ce724df3c5b9753a786 "githalytics.com")](http://githalytics.com/senny/pyenv.el)
