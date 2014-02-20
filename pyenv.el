@@ -5,7 +5,7 @@
 ;; URL: https://github.com/senny/pyenv.el
 ;; Author: Yves Senn <yves.senn@gmail.com>
 ;; Version: 0.0.3
-;; Created: 10 February 2013
+;; Created: 20 February 2014
 ;; Keywords: python pyenv
 
 ;; This file is NOT part of GNU Emacs.
