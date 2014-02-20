@@ -9,8 +9,8 @@ task 'release' do
     raise("This tag has already been committed to the repo.")
   end
 
-  rbenv_contents = File.read('rbenv.el')
-  File.write('rbenv.el', rbenv_contents.gsub("Version: #{current_version}", "Version: #{version}"))
+  pyenv_contents = File.read('pyenv.el')
+  File.write('pyenv.el', pyenv_contents.gsub("Version: #{current_version}", "Version: #{version}"))
 
   run "git commit -a -m \"prepare #{version}\""
 
