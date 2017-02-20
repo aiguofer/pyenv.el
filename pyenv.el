@@ -69,7 +69,7 @@
 
 (defvar pyenv-executable (pyenv--expand-path "bin" "pyenv")
   "path to the pyenv executable")
-  
+
 (defvar pyenv-python-shim (pyenv--expand-path "shims" "python")
   "path to the python shim executable")
 
@@ -107,7 +107,7 @@
   (let ((version-file-path (or (pyenv--locate-file ".python-version")
                                (pyenv--locate-file ".pyenv-version"))))
     (if version-file-path (pyenv-use (pyenv--read-version-from-file version-file-path))
-      (message "[pyenv] could not locate .python-version or .pyenv-version"))))
+      (pyenv-use-global))))
 
 ;;;###autoload
 (defun pyenv-use (python-version)
