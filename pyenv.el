@@ -153,7 +153,8 @@
 (defun pyenv--read-version-from-file (path)
   (with-temp-buffer
     (insert-file-contents path)
-    (pyenv--replace-trailing-whitespace (buffer-substring-no-properties (point-min) (point-max)))))
+    (pyenv--replace-trailing-whitespace (buffer-substring-no-properties (point-min) (point-max)))
+    (pyenv--replace-newline-with-colon (buffer-substring-no-properties (point-min) (- (point-max) 1)))))
 
 (defun pyenv--locate-file (file-name)
   "searches the directory tree for an given file. Returns nil if the file was not found."
@@ -173,6 +174,9 @@
 
 (defun pyenv--replace-trailing-whitespace (text)
   (replace-regexp-in-string "[[:space:]]\\'" "" text))
+
+(defun pyenv--replace-newline-with-colon (text)
+  (replace-regexp-in-string "\\\n" ":" text))
 
 (defun pyenv--update-mode-line ()
   (setq pyenv--modestring (funcall pyenv-modeline-function
