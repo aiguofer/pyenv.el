@@ -178,9 +178,13 @@
 (defun pyenv--replace-newline-with-colon (text)
   (replace-regexp-in-string "\\\n" ":" text))
 
+(defun pyenv--modeline-replace-global ()
+  (if (string= (pyenv--active-python-version) (pyenv--global-python-version))
+      "global" (pyenv--active-python-version)))
+
 (defun pyenv--update-mode-line ()
   (setq pyenv--modestring (funcall pyenv-modeline-function
-                                   (pyenv--active-python-version))))
+                                   (pyenv--modeline-replace-global))))
 
 (defun pyenv--modeline-with-face (current-python)
   (append '(" [")
