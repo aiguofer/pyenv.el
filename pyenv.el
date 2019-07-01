@@ -201,6 +201,20 @@
 (defun pyenv--active-python-version ()
   (or (getenv pyenv-version-environment-variable) (pyenv--global-python-version)))
 
+(defun pyenv-update-on-buffer-switch (prev curr)
+  "Function that can be added to switch-buffer-functions hook to update
+your pyenv whenever you switch to a Python buffer that uses a different
+pyenv version"
+  (if (string-equal "Python" (format-mode-line mode-name nil nil curr))
+      (progn
+        (let* ((old_pyenv (pyenv--active-python-version))
+               (local_pyenv (pyenv--locate-file ".python-version"))
+               (new_pyenv (if local_pyenv
+                              (pyenv--read-version-from-file local_pyenv)
+                            (pyenv--global-python-version))))
+          (if (not (string-equal old_pyenv new_pyenv))
+              (pyenv-use new_pyenv))))))
+
 ;;;###autoload
 (define-minor-mode global-pyenv-mode
   "use pyenv to configure the python version used by your Emacs."
