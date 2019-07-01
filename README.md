@@ -14,6 +14,15 @@ Installation
 (global-pyenv-mode)
 ```
 
+Alternatively, use [straight.el](https://github.com/raxod502/straight.el):
+
+```listp
+(use-package pyenv
+  :straight (:host github :repo "aiguofer/pyenv.el")
+  :config
+  (global-pyenv-mode))
+```
+
 Usage
 -----
 
@@ -55,3 +64,21 @@ brackets. You can change the format by customizing the variable:
 
 You can also define your own function to format the python version as you like.
 
+### Auto-update Pyenv
+
+In order to automatically switch to the corresponding pyenv when switching between Python buffers, you can use [switch-buffer-functions](https://github.com/10sr/switch-buffer-functions-el) and set it up like this:
+
+```lisp
+(use-package switch-buffer-functions
+  :straight t
+  :config
+  (add-hook 'switch-buffer-functions 'pyenv-update-on-buffer-switch))
+```
+
+## Running hooks on pyenv switch
+
+You can use `pyenv-mode-hook` to do things when you change your pyenv. This can be useful for updating code completion backends. For example, you could run `elpy-rpc-restart` when you switch pyenv versions like so:
+
+```lisp
+(add-hook 'pyenv-mode-hook 'elpy-rpc-restart)
+```
