@@ -94,6 +94,9 @@
   "text pyenv-mode will display in the modeline.")
 (put 'pyenv--modestring 'risky-local-variable t)
 
+(defvar pyenv-mode-hook nil
+  "functions to run after switching pyenvs")
+
 ;;;###autoload
 (defun pyenv-use-global ()
   "activate pyenv global python"
@@ -116,6 +119,7 @@
    (let ((picked-python (pyenv--completing-read "Python version: " (pyenv/list))))
      (list picked-python)))
   (pyenv--activate python-version)
+  (run-hooks 'pyenv-mode-hook)
   (message (concat "[pyenv] using " python-version)))
 
 (defun pyenv/list ()
