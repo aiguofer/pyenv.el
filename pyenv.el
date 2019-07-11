@@ -67,6 +67,9 @@
   :group 'pyenv
   :type 'function)
 
+(defvar pyenv-use-alias nil
+  "whether to use version-alias")
+
 (defvar pyenv-executable (pyenv--expand-path "bin" "pyenv")
   "path to the pyenv executable")
 
@@ -77,6 +80,9 @@
   "path to the global version configuration file of pyenv")
 
 (defvar pyenv-version-environment-variable "PYENV_VERSION"
+  "name of the environment variable to configure the pyenv version")
+
+(defvar pyenv-version-alias-environment-variable "PYENV_VERSION_ALIAS"
   "name of the environment variable to configure the pyenv version")
 
 (defvar pyenv-binary-paths (list (cons 'shims-path (pyenv--expand-path "shims"))
@@ -101,21 +107,31 @@
 (defun pyenv-use-global ()
   "activate pyenv global python"
   (interactive)
-  (pyenv-use (pyenv--global-python-version)))
+  (pyenv-use (pyenv--global-python-version) "global"))
 
 ;;;###autoload
 (defun pyenv-use-corresponding ()
   "search for .python-version and activate the corresponding python"
   (interactive)
-  (pyenv-use (pyenv/version-file-read (pyenv/version-file))))
+  (let* ((curr-pyenv (pyenv/version-name))
+         (new-file-path (pyenv/version-file))
+         (new-pyenv (pyenv/version-file-read new-file-path))
+         (alias-file-path (pyenv/version-alias-file))
+         (alias (if (string= new-file-path pyenv-global-version-file)
+                    "global"
+                    (if alias-file-path (pyenv/version-file-read alias-file-path)))))
+    (if (not (string= curr-pyenv new-pyenv))
+        (pyenv-use new-pyenv alias)
+      (message "[pyenv] same pyenv, not changing"))))
 
 ;;;###autoload
-(defun pyenv-use (python-version)
+(defun pyenv-use (python-version &optional alias)
   "choose what python you want to activate"
   (interactive
    (let ((picked-python (pyenv--completing-read "Python version: " (pyenv/list))))
      (list picked-python)))
-  (pyenv--activate python-version)
+
+  (pyenv--activate python-version alias)
   (run-hooks 'pyenv-mode-hook)
   (message (concat "[pyenv] using " python-version)))
 
@@ -127,6 +143,12 @@
 
 (defun pyenv/version-file-read (path)
   (pyenv--call-process "version-file-read" path))
+
+(defun pyenv/version-alias ()
+  (pyenv--call-process "version-alias"))
+
+(defun pyenv/version-alias-file ()
+  (pyenv--call-process "version-alias-file"))
 
 (defun pyenv/list ()
   (split-string (pyenv--call-process "versions" "--bare") "\n"))
@@ -150,8 +172,9 @@
     (setq eshell-path-env (getenv "PATH"))
     (setq pyenv--initialized nil)))
 
-(defun pyenv--activate (python-version)
+(defun pyenv--activate (python-version &optional alias)
   (setenv pyenv-version-environment-variable python-version)
+  (if pyenv-use-alias (setenv pyenv-version-alias-environment-variable alias))
   (pyenv--update-mode-line))
 
 (defun pyenv--completing-read (prompt options)
@@ -174,13 +197,16 @@
 (defun pyenv--replace-trailing-whitespace (text)
   (replace-regexp-in-string "[[:space:]]\\'" "" text))
 
-(defun pyenv--modeline-replace-global ()
-  (if (string= (pyenv/version-name) (pyenv--global-python-version))
-      "global" (pyenv/version-name)))
+
+(defun pyenv--modeline-alias-or-active ()
+  (let ((active (pyenv/version-name))
+        (alias (pyenv/version-alias)))
+    (if pyenv-use-alias (if alias alias active)
+      active)))
 
 (defun pyenv--update-mode-line ()
   (setq pyenv--modestring (funcall pyenv-modeline-function
-                                   (pyenv--modeline-replace-global))))
+                                   (pyenv--modeline-alias-or-active))))
 
 (defun pyenv--modeline-with-face (current-python)
   (append '(" [")
@@ -195,11 +221,7 @@
 your pyenv whenever you switch to a Python buffer that uses a different
 pyenv version"
   (if (string-equal "Python" (format-mode-line mode-name nil nil curr))
-      (progn
-        (let* ((old_pyenv (pyenv/version-name))
-               (new_pyenv (pyenv/version-file-read (pyenv/version-file))))
-          (if (not (string-equal old_pyenv new_pyenv))
-              (pyenv-use new_pyenv))))))
+      (pyenv-use-corresponding)))
 
 ;;;###autoload
 (define-minor-mode global-pyenv-mode
