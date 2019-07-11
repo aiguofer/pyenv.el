@@ -1,4 +1,4 @@
-;;; pyenv.el --- Emacs integration for pyenv
+;;; pyenv.el --- Emacs integration for pyenv -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013 Yves Senn
 
