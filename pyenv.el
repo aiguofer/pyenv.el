@@ -167,7 +167,7 @@
         (add-to-list 'exec-path bin-path)))
     (setq eshell-path-env (getenv "PATH"))
     (setq pyenv--initialized t)
-    (pyenv--update-mode-line)))
+    (pyenv-use-global)))
 
 (defun pyenv--teardown ()
   (when pyenv--initialized
