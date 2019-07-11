@@ -107,10 +107,7 @@
 (defun pyenv-use-corresponding ()
   "search for .python-version and activate the corresponding python"
   (interactive)
-  (let ((version-file-path (or (pyenv--locate-file ".python-version")
-                               (pyenv--locate-file ".pyenv-version"))))
-    (if version-file-path (pyenv-use (pyenv--read-version-from-file version-file-path))
-      (pyenv-use-global))))
+  (pyenv-use (pyenv/version-file-read (pyenv/version-file))))
 
 ;;;###autoload
 (defun pyenv-use (python-version)
@@ -121,6 +118,15 @@
   (pyenv--activate python-version)
   (run-hooks 'pyenv-mode-hook)
   (message (concat "[pyenv] using " python-version)))
+
+(defun pyenv/version-name ()
+  (pyenv--call-process "version-name"))
+
+(defun pyenv/version-file ()
+  (pyenv--call-process "version-file"))
+
+(defun pyenv/version-file-read (path)
+  (pyenv--call-process "version-file-read" path))
 
 (defun pyenv/list ()
   (split-string (pyenv--call-process "versions" "--bare") "\n"))
@@ -152,18 +158,7 @@
   (funcall pyenv-interactive-completion-function prompt options))
 
 (defun pyenv--global-python-version ()
-  (pyenv--read-version-from-file pyenv-global-version-file))
-
-(defun pyenv--read-version-from-file (path)
-  (with-temp-buffer
-    (insert-file-contents path)
-    (pyenv--replace-trailing-whitespace (buffer-substring-no-properties (point-min) (point-max)))
-    (pyenv--replace-newline-with-colon (buffer-substring-no-properties (point-min) (- (point-max) 1)))))
-
-(defun pyenv--locate-file (file-name)
-  "searches the directory tree for an given file. Returns nil if the file was not found."
-  (let ((directory (locate-dominating-file default-directory file-name)))
-    (when directory (concat directory file-name))))
+  (pyenv/version-file-read pyenv-global-version-file))
 
 (defun pyenv--call-process (&rest args)
   (with-temp-buffer
@@ -179,12 +174,9 @@
 (defun pyenv--replace-trailing-whitespace (text)
   (replace-regexp-in-string "[[:space:]]\\'" "" text))
 
-(defun pyenv--replace-newline-with-colon (text)
-  (replace-regexp-in-string "\\\n" ":" text))
-
 (defun pyenv--modeline-replace-global ()
-  (if (string= (pyenv--active-python-version) (pyenv--global-python-version))
-      "global" (pyenv--active-python-version)))
+  (if (string= (pyenv/version-name) (pyenv--global-python-version))
+      "global" (pyenv/version-name)))
 
 (defun pyenv--update-mode-line ()
   (setq pyenv--modestring (funcall pyenv-modeline-function
@@ -198,20 +190,14 @@
 (defun pyenv--modeline-plain (current-python)
   (list " [" current-python "]"))
 
-(defun pyenv--active-python-version ()
-  (or (getenv pyenv-version-environment-variable) (pyenv--global-python-version)))
-
 (defun pyenv-update-on-buffer-switch (prev curr)
   "Function that can be added to switch-buffer-functions hook to update
 your pyenv whenever you switch to a Python buffer that uses a different
 pyenv version"
   (if (string-equal "Python" (format-mode-line mode-name nil nil curr))
       (progn
-        (let* ((old_pyenv (pyenv--active-python-version))
-               (local_pyenv (pyenv--locate-file ".python-version"))
-               (new_pyenv (if local_pyenv
-                              (pyenv--read-version-from-file local_pyenv)
-                            (pyenv--global-python-version))))
+        (let* ((old_pyenv (pyenv/version-name))
+               (new_pyenv (pyenv/version-file-read (pyenv/version-file))))
           (if (not (string-equal old_pyenv new_pyenv))
               (pyenv-use new_pyenv))))))
 
