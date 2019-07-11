@@ -64,14 +64,33 @@ brackets. You can change the format by customizing the variable:
 
 You can also define your own function to format the python version as you like.
 
+You can also configure the pre/post-fix if you don't like the square brackets, for example
+
+```lisp
+(setq pyenv-modestring-prefix " ")
+(setq pyenv-modestring-postfix nil)
+```
+
+**pyenv-version-alias**
+
+If using [pyenv-version-alias](https://github.com/aiguofer/pyenv-version-alias), you can enable it with:
+
+```lisp
+(setq pyenv-use-alias 't)
+```
+
 ### Auto-update Pyenv
 
-In order to automatically switch to the corresponding pyenv when switching between Python buffers, you can use [switch-buffer-functions](https://github.com/10sr/switch-buffer-functions-el) and set it up like this:
+In order to automatically switch to the corresponding pyenv when switching between Python buffers, you can use [switch-buffer-functions](https://github.com/10sr/switch-buffer-functions-el) and set it up like this (note I only update when changing to a Python buffer):
 
 ```lisp
 (use-package switch-buffer-functions
   :straight t
   :config
+  (defun pyenv-update-on-buffer-switch (prev curr)
+    (if (string-equal "Python" (format-mode-line mode-name nil nil curr))
+        (pyenv-use-corresponding)))
+
   (add-hook 'switch-buffer-functions 'pyenv-update-on-buffer-switch))
 ```
 
