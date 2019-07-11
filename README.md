@@ -1,12 +1,30 @@
 pyenv.el
 ========
 
-use pyenv to manage your Python versions within Emacs
+Use pyenv to manage your Python versions within Emacs using [pyenv](https://github.com/pyenv/pyenv). This is useful to make sure your code completion backend has the correct `PYTHONPATH` set up so auto-completion, jump to def, etc work as expected in each project. It can also display the current `pyenv` version running in the modeline as a reminder of the environment you're working in.
 
-pyenv.el was forked from [rbenv.el](https://github.com/senny/rbenv.el)
+This repo was originally forked from [pyenv.el](https://github.com/cyberved/pyenv.el), which was forked from [rbenv.el](https://github.com/senny/rbenv.el).
+
+This version has been changed quite a bit to support a variety of features:
+
+- Allow multiple pyenv versions enabled at once (just like pyenv)
+- Use a global pyenv mode
+- Only activate pyenv mode by setting `PYENV_VERSION` environment variable
+- Allow easy customization of modeline text
+- Support use of [pyenv-version-alias](https://github.com/aiguofer/pyenv-version-alias)
+- Make it easy to auto-switch pyenv when switching between buffers
+- Allow hooks to run when pyenv changes
+
+Why not [pyenv-mode](https://github.com/proofit404/pyenv-mode)?
+
+- Aside from setting the environment variable, `pyenv-mode` also sets the `python-shell-virtualenv-root` which doesn't make much sense in the context of using pyenv, since pyenv enables using multiple versions at once as well as using non-virtualenv versions. It would be though to change that design.
+- `pyenv-mode` depends on `pythonic`, and to get something resembling `global-mode` you also need [pyenv-mode-auto](https://github.com/ssbb/pyenv-mode-auto).
+- I forked this a long time ago to enable using multiple versions at once like pyenv. It was easier to continue modifying this than try to re-architect and hope my PRs get accepted with `pyenv-mode`
 
 Installation
 ------------
+
+Clone this repo into a directory and:
 
 ```lisp
 (add-to-list 'load-path (expand-file-name "/path/to/pyenv.el/"))
