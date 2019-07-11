@@ -64,7 +64,8 @@ brackets. You can change the format by customizing the variable:
 
 You can also define your own function to format the python version as you like.
 
-You can also configure the pre/post-fix if you don't like the square brackets, for example
+You can also configure the pre/post-fix if you don't like the square brackets, for example, to set the prefix
+to the python glyph using Nerd Fonts:
 
 ```lisp
 (setq pyenv-modestring-prefix " ")
