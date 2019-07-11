@@ -222,13 +222,6 @@
 (defun pyenv--modeline-plain (current-python)
   (list pyenv-modestring-prefix current-python pyenv-modestring-postfix))
 
-(defun pyenv-update-on-buffer-switch (prev curr)
-  "Function that can be added to switch-buffer-functions hook to update
-your pyenv whenever you switch to a Python buffer that uses a different
-pyenv version"
-  (if (string-equal "Python" (format-mode-line mode-name nil nil curr))
-      (pyenv-use-corresponding)))
-
 ;;;###autoload
 (define-minor-mode global-pyenv-mode
   "use pyenv to configure the python version used by your Emacs."
