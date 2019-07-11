@@ -103,6 +103,12 @@
 (defvar pyenv-mode-hook nil
   "functions to run after switching pyenvs")
 
+(defvar pyenv-modestring-prefix "["
+  "string to prefix in the modeline")
+
+(defvar pyenv-modestring-postfix "]"
+  "string to postfix in the modeline")
+
 ;;;###autoload
 (defun pyenv-use-global ()
   "activate pyenv global python"
@@ -209,12 +215,12 @@
                                    (pyenv--modeline-alias-or-active))))
 
 (defun pyenv--modeline-with-face (current-python)
-  (append '(" [")
-          (list (propertize current-python 'face 'pyenv-active-python-face))
-          '("]")))
+  (list pyenv-modestring-prefix
+        (list (propertize current-python 'face 'pyenv-active-python-face))
+        pyenv-modestring-postfix))
 
 (defun pyenv--modeline-plain (current-python)
-  (list " [" current-python "]"))
+  (list pyenv-modestring-prefix current-python pyenv-modestring-postfix))
 
 (defun pyenv-update-on-buffer-switch (prev curr)
   "Function that can be added to switch-buffer-functions hook to update
