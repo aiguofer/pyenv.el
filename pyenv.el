@@ -127,8 +127,7 @@
                     "global"
                     (if alias-file-path (pyenv/version-file-read alias-file-path)))))
     (if (not (string= curr-pyenv new-pyenv))
-        (pyenv-use new-pyenv alias)
-      (message "[pyenv] same pyenv, not changing"))))
+        (pyenv-use new-pyenv alias))))
 
 ;;;###autoload
 (defun pyenv-use (python-version &optional alias)
