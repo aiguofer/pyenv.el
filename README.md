@@ -131,6 +131,16 @@ If you have a jupyter kernel per pyenv version installed onto a "global" jupyter
 (advice-add 'python-shell-get-process-name :around #'my-setup-python)
 ```
 
+### ensure `PATH` is set correctly
+
+By default, `pyenv.el` will set up the `PATH` to make sure the necessary `pyenv` directories (`$PYENV_ROOT/{bin,shims}`) are in your `PATH`. If Emacs has already inherited the correct `PATH`, you can disable this behavior by setting:
+
+```lisp
+(setq pyenv-set-path nil)
+```
+
+Note: this needs to be before you call `(global-pyenv-mode)`
+
 ## Running hooks on pyenv switch
 
 You can use `pyenv-mode-hook` to do things when you change your pyenv. This can be useful for updating code completion backends. For example, you could run `elpy-rpc-restart` when you switch pyenv versions like so:

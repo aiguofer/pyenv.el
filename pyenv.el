@@ -109,6 +109,9 @@
 (defvar pyenv-modestring-postfix "]"
   "string to postfix in the modeline")
 
+(defvar pyenv-set-path 't
+  "whether to set up PATH when initializing, otherwise it'll use inherited PATH")
+
 ;;;###autoload
 (defun pyenv-use-global ()
   "activate pyenv global python"
@@ -159,14 +162,14 @@
   (split-string (pyenv--call-process "versions" "--bare") "\n"))
 
 (defun pyenv--setup ()
-  (when (not pyenv--initialized)
+  (when (and pyenv-set-path (not pyenv--initialized))
     (dolist (path-config pyenv-binary-paths)
       (let ((bin-path (cdr path-config)))
         (setenv "PATH" (concat bin-path ":" (getenv "PATH")))
         (add-to-list 'exec-path bin-path)))
     (setq eshell-path-env (getenv "PATH"))
-    (setq pyenv--initialized t)
-    (pyenv-use-global)))
+    (setq pyenv--initialized t))
+  (pyenv-use-global))
 
 (defun pyenv--teardown ()
   (when pyenv--initialized
