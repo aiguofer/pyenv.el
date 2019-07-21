@@ -1,5 +1,4 @@
-pyenv.el
-========
+# pyenv.el
 
 Use pyenv to manage your Python versions within Emacs using [pyenv](https://github.com/pyenv/pyenv). This is useful to make sure your code completion backend has the correct `PYTHONPATH` set up so auto-completion, jump to def, etc work as expected in each project. It can also display the current `pyenv` version running in the modeline as a reminder of the environment you're working in.
 
@@ -21,8 +20,7 @@ Why not [pyenv-mode](https://github.com/proofit404/pyenv-mode)?
 - `pyenv-mode` depends on `pythonic`, and to get something resembling `global-mode` you also need [pyenv-mode-auto](https://github.com/ssbb/pyenv-mode-auto).
 - I forked this a long time ago to enable using multiple versions at once like pyenv. It was easier to continue modifying this than try to re-architect and hope my PRs get accepted with `pyenv-mode`
 
-Installation
-------------
+## Installation
 
 Clone this repo into a directory and:
 
@@ -41,8 +39,7 @@ Alternatively, use [straight.el](https://github.com/raxod502/straight.el):
   (global-pyenv-mode))
 ```
 
-Usage
------
+## Usage
 
 * `global-pyenv-mode` activate / deactivate pyenv.el (The current Python version is shown in the modeline)
 * `pyenv-use-global` will activate your global python
@@ -50,10 +47,9 @@ Usage
 * `pyenv-use-corresponding` searches for .python-version and activates
   the corresponding python
 
-Configuration
--------------
+## Configuration
 
-**pyenv installation directory**
+### pyenv installation directory
 By default pyenv.el assumes that you installed pyenv into
 `~/.pyenv`. If you use a different installation location you can
 customize pyenv.el to search in the right place:
@@ -64,7 +60,7 @@ customize pyenv.el to search in the right place:
 
 *IMPORTANT:*: Currently you need to set this variable before you load pyenv.el
 
-**the modeline**
+### the modeline
 pyenv.el will show you the active python in the modeline. If you don't
 like this feature you can disable it:
 
@@ -90,7 +86,7 @@ to the python glyph using Nerd Fonts:
 (setq pyenv-modestring-postfix nil)
 ```
 
-**pyenv-version-alias**
+### pyenv-version-alias
 
 If using [pyenv-version-alias](https://github.com/aiguofer/pyenv-version-alias), you can enable it with:
 
@@ -98,7 +94,7 @@ If using [pyenv-version-alias](https://github.com/aiguofer/pyenv-version-alias),
 (setq pyenv-use-alias 't)
 ```
 
-### Auto-update Pyenv
+### auto-update pyenv when switching buffers
 
 In order to automatically switch to the corresponding pyenv when switching between Python buffers, you can use [switch-buffer-functions](https://github.com/10sr/switch-buffer-functions-el) and set it up like this (note I only update when changing to a Python buffer):
 
@@ -111,6 +107,28 @@ In order to automatically switch to the corresponding pyenv when switching betwe
         (pyenv-use-corresponding)))
 
   (add-hook 'switch-buffer-functions 'pyenv-update-on-buffer-switch))
+```
+
+### always using the right Jupyter console
+
+If you have a jupyter kernel per pyenv version installed onto a "global" jupyter install (for example, using [pyenv-jupyter-kernel](https://github.com/aiguofer/pyenv-jupyter-kernel)), you could make sure all your shell related commands (`python-shell-send-buffer/region`) work on the right (currently active) kernel using:
+
+```lisp
+(setq python-shell-interpreter "jupyter-console"
+      python-shell-interpreter-args "--simple-prompt"
+      python-shell-prompt-detect-failure-warning nil)
+
+(add-to-list 'python-shell-completion-native-disabled-interpreters
+             "jupyter-console")
+
+(defun my-setup-python (orig-fun &rest args)
+  "Use corresponding kernel"
+  (let* ((curr-python (car (split-string (pyenv/version-name) ":")))
+         (python-shell-buffer-name (concat "Python-" curr-python))
+         (python-shell-interpreter-args (concat "--simple-prompt --kernel=" curr-python)))
+    (apply orig-fun args)))
+
+(advice-add 'python-shell-get-process-name :around #'my-setup-python)
 ```
 
 ## Running hooks on pyenv switch
