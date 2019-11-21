@@ -2,10 +2,11 @@
 
 ;; Copyright (C) 2013 Yves Senn
 
-;; URL: https://github.com/senny/pyenv.el
-;; Author: Yves Senn <yves.senn@gmail.com>
-;; Version: 0.0.3
+;; URL: https://github.com/aiguofer/pyenv.el
+;; Author: Yves Senn <yves.senn@gmail.com>, Diego Fernandez <aiguo.fernandez@gmail.com>
+;; Version: 1.0.0
 ;; Created: 20 February 2014
+;; Package-Requires: ((emacs "24") (eshell))
 ;; Keywords: python pyenv
 
 ;; This file is NOT part of GNU Emacs.
@@ -40,6 +41,8 @@
 ;;; Compiler support:
 
 ;; helper function used in variable definitions
+;;; Code:
+
 (defcustom pyenv-installation-dir (or (getenv "PYENV_ROOT")
                                       (concat (getenv "HOME") "/.pyenv/"))
   "The path to the directory where pyenv was installed."
@@ -47,13 +50,14 @@
   :type 'directory)
 
 (defun pyenv--expand-path (&rest segments)
+  "Expand SEGMENTS full directory path within the pyenv installation."
   (let ((path (mapconcat 'identity segments "/"))
         (installation-dir (replace-regexp-in-string "/$" "" pyenv-installation-dir)))
     (expand-file-name (concat installation-dir "/" path))))
 
 (defcustom pyenv-interactive-completion-function
+  "The function which is used by pyenv.el to interactivly complete user input."
   (if ido-mode 'ido-completing-read 'completing-read)
-  "The function which is used by pyenv.el to interactivly complete user input"
   :group 'pyenv
   :type 'function)
 
@@ -68,100 +72,107 @@
   :type 'function)
 
 (defvar pyenv-use-alias nil
-  "whether to use version-alias")
+  "Whether to use version-alias.")
 
 (defvar pyenv-executable (pyenv--expand-path "bin" "pyenv")
-  "path to the pyenv executable")
+  "Path to the pyenv executable.")
 
 (defvar pyenv-python-shim (pyenv--expand-path "shims" "python")
-  "path to the python shim executable")
+  "Path to the python shim executable.")
 
 (defvar pyenv-global-version-file (pyenv--expand-path "version")
-  "path to the global version configuration file of pyenv")
+  "Path to the global version configuration file of pyenv.")
 
 (defvar pyenv-version-environment-variable "PYENV_VERSION"
-  "name of the environment variable to configure the pyenv version")
+  "Name of the environment variable to configure the pyenv version.")
 
 (defvar pyenv-version-alias-environment-variable "PYENV_VERSION_ALIAS"
-  "name of the environment variable to configure the pyenv version")
+  "Name of the environment variable to configure the pyenv version.")
 
 (defvar pyenv-binary-paths (list (cons 'shims-path (pyenv--expand-path "shims"))
                                  (cons 'bin-path (pyenv--expand-path "bin")))
-  "these are added to PATH and exec-path when pyenv is setup")
+  "These are added to PATH and `exec-path`' when pyenv is setup.")
 
-(defface pyenv-active-python-face
-  '((t (:weight bold :foreground "Red")))
-  "The face used to highlight the current python on the modeline.")
+(defface pyenv-active-python-face '((t (:weight bold :foreground "Red")))
+  "The face used to highlight the current python on the modeline."
+  :group 'pyenv)
 
 (defvar pyenv--initialized nil
-  "indicates if the current Emacs session has been configured to use pyenv")
+  "Indicates if the current Emacs session has been configured to use pyenv.")
 
 (defvar pyenv--modestring nil
-  "text pyenv-mode will display in the modeline.")
+  "Text pyenv-mode will display in the modeline.")
 (put 'pyenv--modestring 'risky-local-variable t)
 
 (defvar pyenv-mode-hook nil
-  "functions to run after switching pyenvs")
+  "Functions to run after switching pyenvs.")
 
 (defvar pyenv-modestring-prefix "["
-  "string to prefix in the modeline")
+  "String to prefix in the modeline.")
 
 (defvar pyenv-modestring-postfix "]"
-  "string to postfix in the modeline")
+  "String to postfix in the modeline.")
 
 (defvar pyenv-set-path 't
-  "whether to set up PATH when initializing, otherwise it'll use inherited PATH")
+  "Whether to set up PATH when initializing, otherwise it'll use inherited PATH.")
 
 ;;;###autoload
 (defun pyenv-use-global ()
-  "activate pyenv global python"
+  "Activate pyenv global python."
   (interactive)
   (pyenv-use (pyenv--global-python-version) "global"))
 
 ;;;###autoload
 (defun pyenv-use-corresponding ()
-  "search for .python-version and activate the corresponding python"
+  "Search for .python-version and activate the corresponding python."
   (interactive)
-  (let* ((curr-pyenv (pyenv/version-name))
-         (new-file-path (pyenv/version-file))
-         (new-pyenv (pyenv/version-file-read new-file-path))
-         (alias-file-path (pyenv/version-alias-file))
+  (let* ((curr-pyenv (pyenv--version-name))
+         (new-file-path (pyenv--version-file))
+         (new-pyenv (pyenv--version-file-read new-file-path))
+         (alias-file-path (pyenv--version-alias-file))
          (alias (if (string= new-file-path pyenv-global-version-file)
                     "global"
-                    (if alias-file-path (pyenv/version-file-read alias-file-path)))))
+                    (if alias-file-path (pyenv--version-file-read alias-file-path)))))
     (if (not (string= curr-pyenv new-pyenv))
         (pyenv-use new-pyenv alias))))
 
 ;;;###autoload
 (defun pyenv-use (python-version &optional alias)
-  "choose what python you want to activate"
+  "Choose what PYTHON-VERSION you want to activate, using an optional ALIAS for display."
   (interactive
-   (let ((picked-python (pyenv--completing-read "Python version: " (pyenv/list))))
+   (let ((picked-python (pyenv--completing-read "Python version: " (pyenv--list))))
      (list picked-python)))
 
   (pyenv--activate python-version alias)
   (run-hooks 'pyenv-mode-hook)
   (message (concat "[pyenv] using " python-version)))
 
-(defun pyenv/version-name ()
+(defun pyenv--version-name ()
+  "Get peynv version name."
   (pyenv--call-process "version-name"))
 
-(defun pyenv/version-file ()
+(defun pyenv--version-file ()
+  "Get peynv version file path."
   (pyenv--call-process "version-file"))
 
-(defun pyenv/version-file-read (path)
+(defun pyenv--version-file-read (path)
+  "Get contents of peynv version file for PATH."
   (pyenv--call-process "version-file-read" path))
 
-(defun pyenv/version-alias ()
+(defun pyenv--version-alias ()
+  "Get peynv version name alias."
   (pyenv--call-process "version-alias"))
 
-(defun pyenv/version-alias-file ()
+(defun pyenv--version-alias-file ()
+  "Get peynv version alias file path."
   (pyenv--call-process "version-alias-file"))
 
-(defun pyenv/list ()
+(defun pyenv--list ()
+  "Get peynv version name."
   (split-string (pyenv--call-process "versions" "--bare") "\n"))
 
 (defun pyenv--setup ()
+  "Set up pyenv by ensuring the PATH is correcty set if necessary."
   (when (and pyenv-set-path (not pyenv--initialized))
     (dolist (path-config pyenv-binary-paths)
       (let ((bin-path (cdr path-config)))
@@ -172,6 +183,7 @@
   (pyenv-use-global))
 
 (defun pyenv--teardown ()
+  "Tear down pyenv by resetting PATH if necessary."
   (when pyenv--initialized
     (dolist (path-config pyenv-binary-paths)
       (let ((bin-path (cdr path-config)))
@@ -181,17 +193,21 @@
     (setq pyenv--initialized nil)))
 
 (defun pyenv--activate (python-version &optional alias)
+  "Set the the pyenv environment variable to PYTHON-VERSION and the pyenv-version-alias environment variable to ALIAS then update modeline."
   (setenv pyenv-version-environment-variable python-version)
   (if pyenv-use-alias (setenv pyenv-version-alias-environment-variable alias))
   (pyenv--update-mode-line))
 
 (defun pyenv--completing-read (prompt options)
+  "Show interactive prompt for available pyenvs."
   (funcall pyenv-interactive-completion-function prompt options))
 
 (defun pyenv--global-python-version ()
-  (pyenv/version-file-read pyenv-global-version-file))
+  "Return the global pyenv version."
+  (pyenv--version-file-read pyenv-global-version-file))
 
 (defun pyenv--call-process (&rest args)
+  "Call the pyenv command passed in ARGS."
   (with-temp-buffer
     (let* ((success (apply 'call-process pyenv-executable nil t nil
                            (delete nil args)))
@@ -203,25 +219,30 @@
         (message output)))))
 
 (defun pyenv--replace-trailing-whitespace (text)
+  "Remove trailing spaces from the given TEXT."
   (replace-regexp-in-string "[[:space:]]\\'" "" text))
 
 
 (defun pyenv--modeline-alias-or-active ()
-  (let ((active (pyenv/version-name))
-        (alias (pyenv/version-alias)))
+  "Return either the alias or the version name of the currently active pyenv version."
+  (let ((active (pyenv--version-name))
+        (alias (pyenv--version-alias)))
     (if pyenv-use-alias (if alias alias active)
       active)))
 
 (defun pyenv--update-mode-line ()
+  "Update the modeline using pyenv-modeline-function."
   (setq pyenv--modestring (funcall pyenv-modeline-function
                                    (pyenv--modeline-alias-or-active))))
 
 (defun pyenv--modeline-with-face (current-python)
+  "Set the pyenv modeline to CURRENT-PYTHON using pyenv-active-python-face."
   (list pyenv-modestring-prefix
         (list (propertize current-python 'face 'pyenv-active-python-face))
         pyenv-modestring-postfix))
 
 (defun pyenv--modeline-plain (current-python)
+  "Set the pyenv modeline in plain text to CURRENT-PYTHON."
   (list pyenv-modestring-prefix current-python pyenv-modestring-postfix))
 
 ;;;###autoload
