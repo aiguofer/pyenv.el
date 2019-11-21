@@ -199,7 +199,7 @@
   (pyenv--update-mode-line))
 
 (defun pyenv--completing-read (prompt options)
-  "Show interactive prompt for available pyenvs."
+  "Show interactive PROMPT with completions for OPTIONS based on available pyenvs."
   (funcall pyenv-interactive-completion-function prompt options))
 
 (defun pyenv--global-python-version ()
@@ -231,7 +231,7 @@
       active)))
 
 (defun pyenv--update-mode-line ()
-  "Update the modeline using pyenv-modeline-function."
+  "Update the modeline using `pyenv-modeline-function'."
   (setq pyenv--modestring (funcall pyenv-modeline-function
                                    (pyenv--modeline-alias-or-active))))
 
