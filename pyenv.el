@@ -30,6 +30,11 @@
 
 ;;; Commentary:
 
+;; pyenv.el lets you use the pyenv version corresponding to each project
+;; and shell without the need for other packages. It also lets you use
+;; the pyenv-version-alias extension. See https://github.com/aiguofer/pyenv.el
+;; for more.
+
 ;; M-x global-pyenv-mode enable use of pyenv and display active pyenv.
 
 ;; M-x pyenv-use-global prepares the current Emacs session to use
@@ -41,9 +46,6 @@
 ;; M-x pyenv-use allows you to switch the current session to the python
 ;; implementation of your choice.
 
-;;; Compiler support:
-
-;; helper function used in variable definitions
 ;;; Code:
 
 (defcustom pyenv-installation-dir (or (getenv "PYENV_ROOT")
