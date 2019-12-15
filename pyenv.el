@@ -30,10 +30,13 @@
 
 ;;; Commentary:
 
-;; M-x global-pyenv-mode toggle the configuration done by pyenv.el
+;; M-x global-pyenv-mode enable use of pyenv and display active pyenv.
 
 ;; M-x pyenv-use-global prepares the current Emacs session to use
 ;; the global python configured with pyenv.
+
+;; M-x pyenv-use-corresponding allows you to switch the current session
+;; to the pyenv version for the current project.
 
 ;; M-x pyenv-use allows you to switch the current session to the python
 ;; implementation of your choice.
