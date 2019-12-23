@@ -57,7 +57,7 @@
 
 (defun pyenv--expand-path (&rest segments)
   "Expand SEGMENTS full directory path within the pyenv installation."
-  (let ((path (mapconcat 'identity segments "/"))
+  (let ((path (mapconcat #'identity segments "/"))
         (installation-dir (replace-regexp-in-string "/$" "" pyenv-installation-dir)))
     (expand-file-name (concat installation-dir "/" path))))
 
@@ -215,7 +215,7 @@
 (defun pyenv--call-process (&rest args)
   "Call the pyenv command passed in ARGS."
   (with-temp-buffer
-    (let* ((success (apply 'call-process pyenv-executable nil t nil
+    (let* ((success (apply #'call-process pyenv-executable nil t nil
                            (delete nil args)))
            (raw-output (buffer-substring-no-properties
                         (point-min) (point-max)))
