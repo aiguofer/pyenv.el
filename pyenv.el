@@ -1,6 +1,6 @@
 ;;; pyenv.el --- Emacs integration for pyenv -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013 Yves Senn
+;; Copyright (C) 2013 Yves Senn, Diego Fernandez
 
 ;; URL: https://github.com/aiguofer/pyenv.el
 ;; Author: Yves Senn <yves.senn@gmail.com>, Diego Fernandez <aiguo.fernandez@gmail.com>
