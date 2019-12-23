@@ -151,7 +151,7 @@
 
   (pyenv--activate python-version alias)
   (run-hooks 'pyenv-mode-hook)
-  (message (concat "[pyenv] using " python-version)))
+  (message "[pyenv] using %s" python-version))
 
 (defun pyenv--version-name ()
   "Get peynv version name."
