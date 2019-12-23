@@ -6,7 +6,7 @@
 ;; Author: Yves Senn <yves.senn@gmail.com>, Diego Fernandez <aiguo.fernandez@gmail.com>
 ;; Version: 1.0.0
 ;; Created: 20 February 2014
-;; Package-Requires: ((emacs "24") (eshell))
+;; Package-Requires: ((emacs "24")
 ;; Keywords: python pyenv
 
 ;; This file is NOT part of GNU Emacs.
@@ -47,6 +47,7 @@
 ;; implementation of your choice.
 
 ;;; Code:
+(require 'eshell)
 
 (defcustom pyenv-installation-dir (or (getenv "PYENV_ROOT")
                                       (concat (getenv "HOME") "/.pyenv/"))
