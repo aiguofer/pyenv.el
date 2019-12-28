@@ -95,6 +95,12 @@
 (defvar pyenv-version-alias-environment-variable "PYENV_VERSION_ALIAS"
   "Name of the environment variable to configure the pyenv version.")
 
+(defvar pyenv-virtualenv-environment-variable "VIRTUAL_ENV"
+  "Name of the environment variable to configure the virtualenv version.")
+
+(defvar pyenv-pyenv-virtualenv-environment-variable "PYENV_VIRTUAL_ENV"
+  "Name of the environment variable to configure the pyenv virtualenv version.")
+
 (defvar pyenv-binary-paths (list (cons 'shims-path (pyenv--expand-path "shims"))
                                  (cons 'bin-path (pyenv--expand-path "bin")))
   "These are added to PATH and `exec-path`' when pyenv is setup.")
@@ -153,6 +159,10 @@
   (run-hooks 'pyenv-mode-hook)
   (message "[pyenv] using %s" python-version))
 
+(defun pyenv--prefix ()
+  "Get peynv prefix."
+  (pyenv--call-process "prefix"))
+
 (defun pyenv--version-name ()
   "Get peynv version name."
   (pyenv--call-process "version-name"))
@@ -174,8 +184,12 @@
   (pyenv--call-process "version-alias-file"))
 
 (defun pyenv--list ()
-  "Get peynv version name."
+  "Get peynv version names."
   (split-string (pyenv--call-process "versions" "--bare") "\n"))
+
+(defun pyenv--list-virtualenvs ()
+  "Get peynv virtualenv version names."
+  (split-string (pyenv--call-process "virtualenvs" "--bare") "\n"))
 
 (defun pyenv--setup ()
   "Set up pyenv by ensuring the PATH is correcty set if necessary."
@@ -201,6 +215,13 @@
 (defun pyenv--activate (python-version &optional alias)
   "Set the the pyenv environment variable to PYTHON-VERSION and the pyenv-version-alias environment variable to ALIAS then update modeline."
   (setenv pyenv-version-environment-variable python-version)
+  (if (member (pyenv--version-name) (pyenv--list-virtualenvs))
+      (progn
+        (setenv pyenv-virtualenv-environment-variable (pyenv--prefix))
+        (setenv pyenv-pyenv-virtualenv-environment-variable (pyenv--prefix)))
+    (progn
+        (setenv pyenv-virtualenv-environment-variable)
+        (setenv pyenv-pyenv-virtualenv-environment-variable)))
   (if pyenv-use-alias (setenv pyenv-version-alias-environment-variable alias))
   (pyenv--update-mode-line))
 
