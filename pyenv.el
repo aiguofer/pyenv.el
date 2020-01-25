@@ -61,9 +61,8 @@
         (installation-dir (replace-regexp-in-string "/$" "" pyenv-installation-dir)))
     (expand-file-name (concat installation-dir "/" path))))
 
-(defcustom pyenv-interactive-completion-function
+(defcustom pyenv-interactive-completion-function (if ido-mode 'ido-completing-read 'completing-read)
   "The function which is used by pyenv.el to interactivly complete user input."
-  (if ido-mode 'ido-completing-read 'completing-read)
   :group 'pyenv
   :type 'function)
 
